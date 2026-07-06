@@ -199,4 +199,47 @@ pub enum BudgetCommand {
 pub enum McpCommand {
     /// Run the OpenHavn MCP server over stdio.
     Serve,
+    /// Register an MCP server across selected harness configs, governed by a provenance lock
+    /// entry and a deterministic admission gate (name is a safe slug, command resolves).
+    Add {
+        /// Name to register the server under (must be a safe slug: `[a-z0-9-_]+`).
+        name: String,
+        /// Comma-separated harnesses to target (claude-project,claude-user,codex,zed). Defaults
+        /// to claude-project + codex + zed, each only when its parent config/dir already exists.
+        #[arg(long, value_delimiter = ',')]
+        target: Option<Vec<String>>,
+        /// Environment variable to set for the server, `KEY=VALUE`. May be repeated.
+        #[arg(long = "env", value_name = "KEY=VALUE")]
+        env: Vec<String>,
+        /// Print the plan without writing any config or lock file.
+        #[arg(long = "dry-run")]
+        dry_run: bool,
+        /// Overwrite an unmanaged (not lock-owned) entry with the same name.
+        #[arg(long)]
+        force: bool,
+        /// The server command, and its arguments (everything after `--`).
+        #[arg(last = true, required = true)]
+        command: Vec<String>,
+    },
+    /// Inventory MCP servers across every harness config: MANAGED (matches the lock), DRIFTED
+    /// (in the lock but the config differs), or UNMANAGED (not in the lock at all).
+    List,
+    /// Remove an MCP server: deletes only lock-owned target entries, then drops the lock entry
+    /// once no targets remain.
+    Rm {
+        name: String,
+        /// Comma-separated harnesses to remove from. Defaults to the lock entry's own targets.
+        #[arg(long, value_delimiter = ',')]
+        target: Option<Vec<String>>,
+        /// Remove an unmanaged (not lock-owned) entry too.
+        #[arg(long)]
+        force: bool,
+    },
+    /// Reconcile every locked MCP server into its targeted harness configs: restore entries
+    /// missing from a config, and repoint drifted ones back to the lock's command/args.
+    Sync {
+        /// Print the plan without writing any config file.
+        #[arg(long = "dry-run")]
+        dry_run: bool,
+    },
 }

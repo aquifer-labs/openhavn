@@ -40,6 +40,21 @@ fn run(cli: Cli) -> Result<i32> {
             runtime.block_on(commands::mcp::serve())?;
             Ok(0)
         }
+        Command::Mcp(McpCommand::Add {
+            name,
+            target,
+            env,
+            dry_run,
+            force,
+            command,
+        }) => commands::mcp::add(&name, target.as_deref(), &env, &command, dry_run, force),
+        Command::Mcp(McpCommand::List) => commands::mcp::list(),
+        Command::Mcp(McpCommand::Rm {
+            name,
+            target,
+            force,
+        }) => commands::mcp::rm(&name, target.as_deref(), force),
+        Command::Mcp(McpCommand::Sync { dry_run }) => commands::mcp::sync(dry_run),
         Command::Init {
             register_mcp,
             dry_run,

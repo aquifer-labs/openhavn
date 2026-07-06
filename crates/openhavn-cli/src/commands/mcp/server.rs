@@ -22,7 +22,7 @@ use rmcp::{schemars, tool, tool_handler, tool_router, ErrorData, ServerHandler, 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use super::{count_kinds, load};
+use crate::commands::{count_kinds, load};
 use crate::render::build_forest;
 use crate::treedata;
 

@@ -378,11 +378,19 @@ fn register_codex(home: &Path, exe: &Path, write: bool) -> Result<RegOutcome> {
 }
 
 // ---------------------------------------------------------------------------------------------
-// zed: ~/.config/zed/settings.json "context_servers".
+// zed: settings.json "context_servers" — the macOS Application Support path when present,
+// falling back to ~/.config/zed (Linux, hermetic test homes). Same preference order as
+// commands::mcp::targets::zed_settings_path and the artesian doctor, so all writers agree on
+// ONE file (a split brain here is exactly how stale registrations survive).
 // ---------------------------------------------------------------------------------------------
 
 fn zed_settings_path(home: &Path) -> PathBuf {
-    home.join(".config").join("zed").join("settings.json")
+    let app_support = home.join("Library").join("Application Support");
+    if app_support.is_dir() {
+        app_support.join("Zed").join("settings.json")
+    } else {
+        home.join(".config").join("zed").join("settings.json")
+    }
 }
 
 fn register_zed(home: &Path, exe: &Path, write: bool) -> Result<RegOutcome> {
