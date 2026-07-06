@@ -1,0 +1,2 @@
+{"kind": "spawn", "receipt_id": "rc_run2_000001", "ts": "2026-07-05T22:00:00Z", "parent": "root", "task_boundary": "small fix", "budget": {"max_tokens": 10000}}
+{"kind": "return", "receipt_id": "rc_run2_000002", "ts": "2026-07-05T22:09:00Z", "spawn_ref": "rc_run2_000001", "stop_reason": "done", "consumed": {"tokens": 15000}}

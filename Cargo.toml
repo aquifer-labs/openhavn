@@ -1,9 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
 [workspace]
 resolver = "2"
-members = ["crates/openhavn-cli"]
+members = ["crates/openhavn-cli", "crates/openhavn-receipts"]
 
 [workspace.package]
 version = "0.0.1"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/aquifer-labs/openhavn"
+
+[workspace.dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+thiserror = "1"
+openhavn-receipts = { path = "crates/openhavn-receipts" }

@@ -10,3 +10,8 @@ repository.workspace = true
 [[bin]]
 name = "openhavn"
 path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+anyhow.workspace = true
+openhavn-receipts.workspace = true
