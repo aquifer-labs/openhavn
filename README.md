@@ -37,14 +37,16 @@ snapshot + qualify log; extending to lifecycle receipts). Artesian governs one l
 OpenHavn governs the fleet above it. Both **complement** the harnesses you already use — they
 never replace them.
 
-## Install (planned surface)
+## Install
 
 ```
-brew install aquifer-labs/tap/openhavn   # CLI + MCP server
-openhavn init                            # detect harnesses, wire MCP, done
+brew install aquifer-labs/tap/openhavn   # CLI + MCP server, one binary
+openhavn init --register-mcp             # detect harnesses, wire MCP, done
 ```
 
-One binary, no daemon, MCP drop-in.
+One binary, no daemon, MCP drop-in. Today it ships: `openhavn run -- <cmd>` (a receipt pair for
+any command), `receipts validate|show`, `budget tree` (context-efficiency per subagent),
+`watch [--once]`, `init [--register-mcp]`, and `mcp serve` (4 tools).
 
 ## License
 
