@@ -5,11 +5,11 @@
 use std::path::Path;
 
 use anyhow::Result;
-use openhavn_receipts::{BudgetDimension, Receipt};
+use openhavn_receipts::BudgetDimension;
 
 use crate::render::{fmt_num, role_at_harness, truncate, Node};
 
-use super::load;
+use super::{count_kinds, load};
 
 /// `openhavn receipts validate <path>`. Returns the process exit code (0 = clean, 1 = violations
 /// found) — never fails the process on a *semantic* violation, only on I/O / parse errors.
@@ -18,14 +18,7 @@ pub fn validate(path: &Path) -> Result<i32> {
     let violations = openhavn_receipts::validate(&records);
 
     if violations.is_empty() {
-        let spawns = records
-            .iter()
-            .filter(|r| matches!(r, Receipt::Spawn(_)))
-            .count();
-        let returns = records
-            .iter()
-            .filter(|r| matches!(r, Receipt::Return(_)))
-            .count();
+        let (spawns, returns) = count_kinds(&records);
         println!(
             "ok — {} records, {} spawns, {} returns",
             records.len(),

@@ -7,11 +7,12 @@
 mod cli;
 mod commands;
 mod render;
+mod treedata;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::Parser;
 
-use cli::{BudgetCommand, Cli, Command, ReceiptsCommand};
+use cli::{BudgetCommand, Cli, Command, McpCommand, ReceiptsCommand};
 
 fn main() {
     let cli = Cli::parse();
@@ -34,5 +35,14 @@ fn run(cli: Cli) -> Result<i32> {
         }
         Command::Receipts(ReceiptsCommand::Show { path }) => commands::receipts::show(&path),
         Command::Budget(BudgetCommand::Tree { path }) => commands::budget::tree(&path),
+        Command::Mcp(McpCommand::Serve) => {
+            let runtime = tokio::runtime::Runtime::new().context("building tokio runtime")?;
+            runtime.block_on(commands::mcp::serve())?;
+            Ok(0)
+        }
+        Command::Init {
+            register_mcp,
+            dry_run,
+        } => commands::init::run(register_mcp, dry_run),
     }
 }

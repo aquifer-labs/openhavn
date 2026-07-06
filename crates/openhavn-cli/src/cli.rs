@@ -25,6 +25,19 @@ pub enum Command {
     /// Budget composition and fleet observability.
     #[command(subcommand)]
     Budget(BudgetCommand),
+    /// Model Context Protocol server.
+    #[command(subcommand)]
+    Mcp(McpCommand),
+    /// Detect installed agent harnesses and (optionally) register the OpenHavn MCP server.
+    Init {
+        /// Register `openhavn mcp serve` as an MCP server for every detected harness that
+        /// supports it (claude, codex, zed). Idempotent: re-running never duplicates an entry.
+        #[arg(long)]
+        register_mcp: bool,
+        /// Preview what `--register-mcp` would write without touching any file.
+        #[arg(long)]
+        dry_run: bool,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -49,4 +62,10 @@ pub enum BudgetCommand {
         /// Path to a receipts.jsonl file, or a `<name>.ocf` bundle directory containing one.
         path: PathBuf,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum McpCommand {
+    /// Run the OpenHavn MCP server over stdio.
+    Serve,
 }
