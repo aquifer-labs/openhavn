@@ -12,7 +12,7 @@ mod treedata;
 use anyhow::{Context, Result};
 use clap::Parser;
 
-use cli::{BudgetCommand, Cli, Command, McpCommand, ReceiptsCommand};
+use cli::{BudgetCommand, Cli, Command, McpCommand, ReceiptsCommand, SkillCommand};
 
 fn main() {
     let cli = Cli::parse();
@@ -46,5 +46,28 @@ fn run(cli: Cli) -> Result<i32> {
         } => commands::init::run(register_mcp, dry_run),
         Command::Run(args) => commands::run::run(*args),
         Command::Watch { path, once } => commands::watch::watch(&path, once),
+        Command::Skill(SkillCommand::Install {
+            source,
+            name,
+            global,
+            target,
+            dry_run,
+            force,
+        }) => commands::skill::install(
+            &source,
+            name.as_deref(),
+            global,
+            target.as_deref(),
+            dry_run,
+            force,
+        ),
+        Command::Skill(SkillCommand::List { global }) => commands::skill::list(global),
+        Command::Skill(SkillCommand::Update {
+            name,
+            all,
+            global,
+            dry_run,
+        }) => commands::skill::update(name.as_deref(), all, global, dry_run),
+        Command::Skill(SkillCommand::Rm { name, global }) => commands::skill::rm(&name, global),
     }
 }

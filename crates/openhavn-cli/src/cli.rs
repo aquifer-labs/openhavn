@@ -59,6 +59,69 @@ pub enum Command {
         #[arg(long)]
         once: bool,
     },
+    /// Governed cross-harness skill logistics: install / update / list / remove skills, with a
+    /// provenance lockfile, drift detection, and a deterministic admission gate (never
+    /// prompt-based) whose decisions are appended to `~/.openhavn/equipment.jsonl`.
+    #[command(subcommand)]
+    Skill(SkillCommand),
+}
+
+#[derive(Debug, Subcommand)]
+pub enum SkillCommand {
+    /// Fetch a skill (a local directory, or a git URL) and, once it clears the admission gate,
+    /// install it into every selected harness's skill directory.
+    Install {
+        /// A local directory containing a `SKILL.md`, or a git source: a URL ending `.git`, or
+        /// one starting `https://github.com/` (optionally with `/<subdir>` after the repo path
+        /// naming where the skill lives inside that repo).
+        source: String,
+        /// Name to install under. Defaults to the `name:` in the fetched SKILL.md frontmatter.
+        #[arg(long)]
+        name: Option<String>,
+        /// Install into (and lock via) the global scope — `~/.openhavn/skills.lock` and each
+        /// harness's `~/.<harness>/...` skill directory — instead of the project scope.
+        #[arg(long)]
+        global: bool,
+        /// Comma-separated harnesses to install into (`claude,codex,opencode`). Defaults to
+        /// every harness detected as installed on this machine.
+        #[arg(long, value_delimiter = ',')]
+        target: Option<Vec<String>>,
+        /// Print the install plan without fetching admission-gate decisions to disk or writing
+        /// any file.
+        #[arg(long = "dry-run")]
+        dry_run: bool,
+        /// Overwrite a target directory even if it already exists and isn't owned by this
+        /// skill's lock entry.
+        #[arg(long)]
+        force: bool,
+    },
+    /// List locked skills and, for each installed target, whether it is `OK` (content hash
+    /// matches the lock), `MODIFIED` (drifted), or `MISSING`.
+    List {
+        /// Read `~/.openhavn/skills.lock` instead of the project-scoped `openhavn.lock`.
+        #[arg(long)]
+        global: bool,
+    },
+    /// Refetch a locked skill's source and reinstall it if the content changed (pin+notify:
+    /// content only ever changes via an explicit `update`, never silently on `install`).
+    Update {
+        /// Skill name to update. Omit and pass `--all` to update every locked skill instead.
+        name: Option<String>,
+        /// Update every locked skill.
+        #[arg(long)]
+        all: bool,
+        #[arg(long)]
+        global: bool,
+        /// Print what would change without writing anything.
+        #[arg(long = "dry-run")]
+        dry_run: bool,
+    },
+    /// Remove a skill: deletes only the directories its lock entry owns, then drops the entry.
+    Rm {
+        name: String,
+        #[arg(long)]
+        global: bool,
+    },
 }
 
 #[derive(Debug, Args)]

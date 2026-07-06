@@ -21,3 +21,4 @@ rmcp = { workspace = true, features = ["transport-io"] }
 tokio.workspace = true
 toml.workspace = true
 chrono.workspace = true
+sha2.workspace = true

@@ -341,3 +341,76 @@ fn watch_once_over_budget_fixture_exits_one() {
     );
     assert!(stdout.contains("open spawns: 0"), "stdout: {stdout}");
 }
+
+// ---------------------------------------------------------------------------------------------
+// `openhavn skill install|list|rm` — governed cross-harness skill logistics.
+// ---------------------------------------------------------------------------------------------
+
+/// Like [`run`], but sets a fake `HOME` (so the equipment log / global lock never touch the
+/// real developer's `~/.openhavn`) and a working directory (the project scope root).
+fn run_with_home(
+    home: &std::path::Path,
+    dir: &std::path::Path,
+    args: &[&str],
+) -> (i32, String, String) {
+    let output = Command::new(env!("CARGO_BIN_EXE_openhavn"))
+        .args(args)
+        .current_dir(dir)
+        .env("HOME", home)
+        .output()
+        .expect("openhavn binary should run");
+    (
+        output.status.code().unwrap_or(-1),
+        String::from_utf8(output.stdout).expect("stdout is UTF-8"),
+        String::from_utf8(output.stderr).expect("stderr is UTF-8"),
+    )
+}
+
+#[test]
+fn skill_install_list_rm_round_trip_project_scope() {
+    let tag = std::process::id();
+    let home = std::env::temp_dir().join(format!("openhavn-cli-smoke-skill-home-{tag}"));
+    let project = std::env::temp_dir().join(format!("openhavn-cli-smoke-skill-project-{tag}"));
+    let skill_src = std::env::temp_dir().join(format!("openhavn-cli-smoke-skill-src-{tag}"));
+    for dir in [&home, &project, &skill_src] {
+        let _ = std::fs::remove_dir_all(dir);
+        std::fs::create_dir_all(dir).unwrap();
+    }
+    std::fs::write(
+        skill_src.join("SKILL.md"),
+        "---\nname: demo-skill\ndescription: A demo skill for the smoke test\n---\nBody.\n",
+    )
+    .unwrap();
+
+    let (code, stdout, stderr) = run_with_home(
+        &home,
+        &project,
+        &[
+            "skill",
+            "install",
+            skill_src.to_str().unwrap(),
+            "--target",
+            "claude",
+        ],
+    );
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(
+        stdout.contains("installed 'demo-skill'"),
+        "stdout: {stdout}"
+    );
+    assert!(project.join(".claude/skills/demo-skill/SKILL.md").is_file());
+
+    let (code, stdout, stderr) = run_with_home(&home, &project, &["skill", "list"]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(stdout.contains("demo-skill"), "stdout: {stdout}");
+    assert!(stdout.contains("OK"), "stdout: {stdout}");
+
+    let (code, stdout, stderr) = run_with_home(&home, &project, &["skill", "rm", "demo-skill"]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(stdout.contains("removed 'demo-skill'"), "stdout: {stdout}");
+    assert!(!project.join(".claude/skills/demo-skill").exists());
+
+    std::fs::remove_dir_all(&home).ok();
+    std::fs::remove_dir_all(&project).ok();
+    std::fs::remove_dir_all(&skill_src).ok();
+}
