@@ -4,7 +4,7 @@
 
 use std::path::PathBuf;
 
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -38,6 +38,74 @@ pub enum Command {
         #[arg(long)]
         dry_run: bool,
     },
+    /// Govern an arbitrary command with a spawn/return receipt pair — the harness-agnostic entry
+    /// point. Writes a spawn receipt before launching, then exactly one return receipt after the
+    /// child exits; exits with the child's own exit code (killed by a signal -> 130). If none of
+    /// --budget-tokens/--budget-tool-calls/--budget-time-ms/--budget-cost is given, defaults to
+    /// a budget of max_wall_time_ms=86400000 (24h) and prints a warning; pass --fail-closed to
+    /// refuse to launch instead.
+    //
+    // A `Box<RunArgs>` (rather than inline struct-variant fields) purely to keep `Command`
+    // itself small — see `clippy::large_enum_variant`; every other variant is a few bytes.
+    Run(Box<RunArgs>),
+    /// Tail a receipts.jsonl stream (or a directory of them) and print new records and
+    /// violations as they're appended.
+    Watch {
+        /// Path to a receipts.jsonl file, or a directory to search (recursively, max depth 3)
+        /// for `receipts*.jsonl` files. New files are picked up on each rescan.
+        path: PathBuf,
+        /// Single pass: print current records + violations, then exit (0 = clean, 1 =
+        /// violations found) — CI mode. Without this flag, poll every 500ms until interrupted.
+        #[arg(long)]
+        once: bool,
+    },
+}
+
+#[derive(Debug, Args)]
+pub struct RunArgs {
+    /// Role recorded on the spawn receipt (e.g. "worker", "reviewer").
+    #[arg(long)]
+    pub role: Option<String>,
+    /// Harness recorded on the spawn receipt. Defaults to the launched command's basename.
+    #[arg(long)]
+    pub harness: Option<String>,
+    /// Model recorded on the spawn receipt.
+    #[arg(long)]
+    pub model: Option<String>,
+    /// Task boundary recorded on the spawn receipt. Defaults to the launched command line,
+    /// truncated to 200 characters.
+    #[arg(long)]
+    pub task: Option<String>,
+    /// Budget: max tokens.
+    #[arg(long = "budget-tokens")]
+    pub budget_tokens: Option<u64>,
+    /// Budget: max tool calls.
+    #[arg(long = "budget-tool-calls")]
+    pub budget_tool_calls: Option<u64>,
+    /// Budget: max wall-clock time, in milliseconds.
+    #[arg(long = "budget-time-ms")]
+    pub budget_time_ms: Option<u64>,
+    /// Budget: max cost, in USD.
+    #[arg(long = "budget-cost")]
+    pub budget_cost: Option<f64>,
+    /// `parent` receipt_id recorded on the spawn receipt. Defaults to the literal "root".
+    #[arg(long)]
+    pub parent: Option<String>,
+    /// Receipts file, or a directory treated as an `.ocf` bundle (`<dir>/receipts.jsonl`).
+    /// Defaults to `./.openhavn/runs/<run-id>/receipts.jsonl`.
+    #[arg(long)]
+    pub receipts: Option<PathBuf>,
+    /// Run id embedded in generated receipt ids and in the default receipts path. Defaults to
+    /// `run-<current UTC timestamp, compact>`.
+    #[arg(long = "run-id")]
+    pub run_id: Option<String>,
+    /// Refuse to launch when no `--budget-*` flag is given, instead of defaulting to a 24h
+    /// wall-time budget (with a warning).
+    #[arg(long = "fail-closed")]
+    pub fail_closed: bool,
+    /// The command to launch, and its arguments (everything after `--`).
+    #[arg(last = true, required = true)]
+    pub command: Vec<String>,
 }
 
 #[derive(Debug, Subcommand)]

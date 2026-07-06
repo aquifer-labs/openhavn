@@ -4,6 +4,8 @@ pub mod budget;
 pub mod init;
 pub mod mcp;
 pub mod receipts;
+pub mod run;
+pub mod watch;
 
 use std::path::Path;
 

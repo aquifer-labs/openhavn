@@ -44,5 +44,7 @@ fn run(cli: Cli) -> Result<i32> {
             register_mcp,
             dry_run,
         } => commands::init::run(register_mcp, dry_run),
+        Command::Run(args) => commands::run::run(*args),
+        Command::Watch { path, once } => commands::watch::watch(&path, once),
     }
 }
