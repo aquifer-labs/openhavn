@@ -10,11 +10,11 @@
 //! `commands/receipts.rs` / `commands/budget.rs`, independently of this module, so the text path
 //! never pays for a JSON round trip.
 
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value, json};
 
 use openhavn_receipts::BudgetDimension;
 
-use crate::render::{all_nodes, Node};
+use crate::render::{Node, all_nodes};
 
 /// One spawn node as DATA: `{receipt_id, role, harness, task_boundary, stop_reason, budget,
 /// consumed, children}` (plus `orphan_parent` when the node's declared parent doesn't resolve).
@@ -56,10 +56,8 @@ fn build_node_json(node: &Node<'_>, with_efficiency: bool) -> Value {
     if let Some(parent) = node.orphan_parent {
         map.insert("orphan_parent".to_string(), json!(parent));
     }
-    if with_efficiency {
-        if let Some(efficiency) = context_efficiency(node) {
-            map.insert("context_efficiency".to_string(), json!(efficiency));
-        }
+    if with_efficiency && let Some(efficiency) = context_efficiency(node) {
+        map.insert("context_efficiency".to_string(), json!(efficiency));
     }
     let children: Vec<Value> = node
         .children

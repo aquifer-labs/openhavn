@@ -7,7 +7,7 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 /// Filesystem anchors used for skill path resolution, overridable for tests — the same pattern
 /// as `commands::init::DetectRoots`: nothing in this module (or its siblings) reads `$HOME` or

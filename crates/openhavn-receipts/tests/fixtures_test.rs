@@ -2,7 +2,7 @@
 
 //! Validation against the OCF conformance fixtures (aquifer-labs/ocf `conformance/`).
 
-use openhavn_receipts::{parse_jsonl, validate, Receipt, Violation};
+use openhavn_receipts::{Receipt, Violation, parse_jsonl, validate};
 
 const VALID: &str = include_str!("fixtures/valid.jsonl");
 const OVER_BUDGET: &str = include_str!("fixtures/over-budget.jsonl");

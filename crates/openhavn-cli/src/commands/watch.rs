@@ -167,10 +167,10 @@ fn open_spawn_count(records: &[Receipt]) -> usize {
     let mut spawn_ids: Vec<&str> = Vec::new();
     let mut seen: HashSet<&str> = HashSet::new();
     for record in records {
-        if let Receipt::Spawn(s) = record {
-            if seen.insert(s.receipt_id.as_str()) {
-                spawn_ids.push(s.receipt_id.as_str());
-            }
+        if let Receipt::Spawn(s) = record
+            && seen.insert(s.receipt_id.as_str())
+        {
+            spawn_ids.push(s.receipt_id.as_str());
         }
     }
     let returned: HashSet<&str> = records

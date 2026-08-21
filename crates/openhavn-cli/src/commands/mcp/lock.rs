@@ -60,7 +60,7 @@ impl Lockfile {
             Ok(text) => text,
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => String::new(),
             Err(e) => {
-                return Err(e).with_context(|| format!("reading lockfile {}", path.display()))
+                return Err(e).with_context(|| format!("reading lockfile {}", path.display()));
             }
         };
         let root = if text.trim().is_empty() {

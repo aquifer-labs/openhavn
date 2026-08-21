@@ -10,7 +10,7 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 /// Filesystem anchors used for MCP config resolution, overridable for tests — the same pattern
 /// as `commands::init::DetectRoots` / `commands::skill::targets::Roots`: nothing in this module

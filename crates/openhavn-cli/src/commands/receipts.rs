@@ -7,7 +7,7 @@ use std::path::Path;
 use anyhow::Result;
 use openhavn_receipts::BudgetDimension;
 
-use crate::render::{fmt_num, role_at_harness, truncate, Node};
+use crate::render::{Node, fmt_num, role_at_harness, truncate};
 
 use super::{count_kinds, load};
 

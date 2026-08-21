@@ -11,7 +11,7 @@ pub mod watch;
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use openhavn_receipts::{resolve_receipts_path, Receipt};
+use openhavn_receipts::{Receipt, resolve_receipts_path};
 
 /// Read and parse the receipts log at `path` (a direct `receipts.jsonl` file, or an `.ocf`
 /// bundle directory containing one).
