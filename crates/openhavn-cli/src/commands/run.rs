@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use std::process::Command as ChildCommand;
 use std::time::Instant;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use chrono::{SecondsFormat, Utc};
 use openhavn_receipts::{
     BudgetEnvelope, Consumed, Receipt, ReceiptIdGen, ReceiptLog, ReturnReceipt, SpawnReceipt,
@@ -87,11 +87,11 @@ pub fn run(opts: RunArgs) -> Result<i32> {
             .join("receipts.jsonl")
     });
     let log = ReceiptLog::new(receipts_path);
-    if let Some(dir) = log.path().parent() {
-        if !dir.as_os_str().is_empty() {
-            std::fs::create_dir_all(dir)
-                .with_context(|| format!("creating receipts directory {}", dir.display()))?;
-        }
+    if let Some(dir) = log.path().parent()
+        && !dir.as_os_str().is_empty()
+    {
+        std::fs::create_dir_all(dir)
+            .with_context(|| format!("creating receipts directory {}", dir.display()))?;
     }
 
     let id_gen = ReceiptIdGen::new(&run_id);

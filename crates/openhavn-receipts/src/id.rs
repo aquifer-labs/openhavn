@@ -42,15 +42,15 @@ mod tests {
 
     #[test]
     fn starts_at_one_and_is_zero_padded() {
-        let gen = ReceiptIdGen::new("run1");
-        assert_eq!(gen.next_id(), "rc_run1_000001");
-        assert_eq!(gen.next_id(), "rc_run1_000002");
+        let idgen = ReceiptIdGen::new("run1");
+        assert_eq!(idgen.next_id(), "rc_run1_000001");
+        assert_eq!(idgen.next_id(), "rc_run1_000002");
     }
 
     #[test]
     fn is_monotonic_across_many_calls() {
-        let gen = ReceiptIdGen::new("runX");
-        let ids: Vec<String> = (0..1000).map(|_| gen.next_id()).collect();
+        let idgen = ReceiptIdGen::new("runX");
+        let ids: Vec<String> = (0..1000).map(|_| idgen.next_id()).collect();
         let mut sorted = ids.clone();
         sorted.sort();
         assert_eq!(

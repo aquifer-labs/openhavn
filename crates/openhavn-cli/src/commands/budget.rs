@@ -8,7 +8,7 @@ use std::path::Path;
 use anyhow::Result;
 use openhavn_receipts::{BudgetDimension, Violation};
 
-use crate::render::{all_nodes, fmt_num, role_at_harness, truncate, Node};
+use crate::render::{Node, all_nodes, fmt_num, role_at_harness, truncate};
 
 use super::load;
 
@@ -75,19 +75,18 @@ fn print_node(
         );
     }
 
-    if let Some(ret) = node.ret {
-        if let (Some(distilled_tokens), Some(consumed_tokens)) = (
+    if let Some(ret) = node.ret
+        && let (Some(distilled_tokens), Some(consumed_tokens)) = (
             ret.distilled.as_ref().and_then(|d| d.tokens),
             ret.consumed.tokens,
-        ) {
-            if consumed_tokens > 0 {
-                let efficiency = distilled_tokens as f64 / consumed_tokens as f64;
-                println!(
-                    "{indent}  context-efficiency: {:.2}% ({distilled_tokens}/{consumed_tokens})",
-                    efficiency * 100.0
-                );
-            }
-        }
+        )
+        && consumed_tokens > 0
+    {
+        let efficiency = distilled_tokens as f64 / consumed_tokens as f64;
+        println!(
+            "{indent}  context-efficiency: {:.2}% ({distilled_tokens}/{consumed_tokens})",
+            efficiency * 100.0
+        );
     }
 
     for child in &node.children {

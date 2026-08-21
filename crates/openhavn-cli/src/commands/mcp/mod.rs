@@ -25,7 +25,7 @@ use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::PathBuf;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use chrono::{SecondsFormat, Utc};
 
 pub use server::serve;
@@ -140,10 +140,10 @@ fn add_core(
     let mut target_harnesses = requested.clone();
     if let Some(existing) = &existing {
         for t in &existing.targets {
-            if let Some(h) = Harness::parse(&t.harness) {
-                if !target_harnesses.contains(&h) {
-                    target_harnesses.push(h);
-                }
+            if let Some(h) = Harness::parse(&t.harness)
+                && !target_harnesses.contains(&h)
+            {
+                target_harnesses.push(h);
             }
         }
     }
@@ -163,17 +163,17 @@ fn add_core(
     }
 
     for h in &target_harnesses {
-        if let ReadResult::Present(map) = config::read_all(*h, roots)? {
-            if map.contains_key(name) {
-                let owned = existing
-                    .as_ref()
-                    .is_some_and(|e| e.targets.iter().any(|t| t.harness == h.name()));
-                if !owned && !force {
-                    bail!(
-                        "unmanaged server '{name}' exists in {} (use --force)",
-                        h.name()
-                    );
-                }
+        if let ReadResult::Present(map) = config::read_all(*h, roots)?
+            && map.contains_key(name)
+        {
+            let owned = existing
+                .as_ref()
+                .is_some_and(|e| e.targets.iter().any(|t| t.harness == h.name()));
+            if !owned && !force {
+                bail!(
+                    "unmanaged server '{name}' exists in {} (use --force)",
+                    h.name()
+                );
             }
         }
     }
@@ -475,14 +475,12 @@ fn find_existing_env(
     targets: &[McpLockTarget],
 ) -> Result<BTreeMap<String, String>> {
     for t in targets {
-        if let Some(h) = Harness::parse(&t.harness) {
-            if let ReadResult::Present(map) = config::read_all(h, roots)? {
-                if let Some(entry) = map.get(name) {
-                    if !entry.env.is_empty() {
-                        return Ok(entry.env.clone());
-                    }
-                }
-            }
+        if let Some(h) = Harness::parse(&t.harness)
+            && let ReadResult::Present(map) = config::read_all(h, roots)?
+            && let Some(entry) = map.get(name)
+            && !entry.env.is_empty()
+        {
+            return Ok(entry.env.clone());
         }
     }
     Ok(BTreeMap::new())
@@ -750,17 +748,21 @@ mod tests {
         assert!(cp["mcpServers"].get("demo").is_none());
 
         let lock_path = lock::lock_path(&roots);
-        assert!(Lockfile::load(&lock_path)
-            .unwrap()
-            .entries()
-            .unwrap()
-            .is_empty());
+        assert!(
+            Lockfile::load(&lock_path)
+                .unwrap()
+                .entries()
+                .unwrap()
+                .is_empty()
+        );
 
         let equipment_log =
             std::fs::read_to_string(roots.home.join(".openhavn").join("equipment.jsonl")).unwrap();
-        assert!(equipment_log
-            .lines()
-            .any(|l| l.contains("\"decision\":\"remove\"")));
+        assert!(
+            equipment_log
+                .lines()
+                .any(|l| l.contains("\"decision\":\"remove\""))
+        );
         cleanup(&roots);
     }
 
@@ -813,9 +815,11 @@ mod tests {
 
         let equipment_log =
             std::fs::read_to_string(roots.home.join(".openhavn").join("equipment.jsonl")).unwrap();
-        assert!(equipment_log
-            .lines()
-            .any(|l| l.contains("\"decision\":\"update\"")));
+        assert!(
+            equipment_log
+                .lines()
+                .any(|l| l.contains("\"decision\":\"update\""))
+        );
         cleanup(&roots);
     }
 

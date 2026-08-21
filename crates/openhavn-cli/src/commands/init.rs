@@ -12,7 +12,7 @@ use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value, json};
 
 /// Filesystem (and `PATH`) anchors used for harness detection, overridable for tests. Without
 /// this, detection would depend on whatever happens to be installed/on `PATH` on the machine

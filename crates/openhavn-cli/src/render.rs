@@ -29,11 +29,11 @@ pub fn build_forest(records: &[Receipt]) -> Vec<Node<'_>> {
     let mut spawns_by_id: HashMap<&str, &SpawnReceipt> = HashMap::new();
     let mut spawn_order: Vec<&str> = Vec::new();
     for record in records {
-        if let Receipt::Spawn(spawn) = record {
-            if !spawns_by_id.contains_key(spawn.receipt_id.as_str()) {
-                spawns_by_id.insert(spawn.receipt_id.as_str(), spawn);
-                spawn_order.push(spawn.receipt_id.as_str());
-            }
+        if let Receipt::Spawn(spawn) = record
+            && !spawns_by_id.contains_key(spawn.receipt_id.as_str())
+        {
+            spawns_by_id.insert(spawn.receipt_id.as_str(), spawn);
+            spawn_order.push(spawn.receipt_id.as_str());
         }
     }
 

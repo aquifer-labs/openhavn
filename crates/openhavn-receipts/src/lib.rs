@@ -19,9 +19,9 @@ mod model;
 mod validate;
 
 pub use id::ReceiptIdGen;
-pub use log::{parse_jsonl, resolve_receipts_path, ReceiptLog};
+pub use log::{ReceiptLog, parse_jsonl, resolve_receipts_path};
 pub use model::{
     Artifact, BudgetEnvelope, Consumed, ContentEncoding, Distilled, GateDecision, Receipt,
     ReceiptError, ReturnReceipt, SpawnReceipt, StopReason,
 };
-pub use validate::{validate, BudgetDimension, Violation, XorProblem};
+pub use validate::{BudgetDimension, Violation, XorProblem, validate};

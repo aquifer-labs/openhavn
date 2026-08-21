@@ -19,13 +19,13 @@ mod targets;
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use chrono::{SecondsFormat, Utc};
 
 use equipment::EquipmentRecord;
 use gate::GateOutcome;
 use lock::{LockEntry, LockTarget, Lockfile};
-use targets::{resolve_targets, Harness, Roots};
+use targets::{Harness, Roots, resolve_targets};
 
 /// `openhavn skill install <source> [--name] [--global] [--target a,b] [--dry-run] [--force]`.
 pub fn install(
@@ -121,10 +121,8 @@ fn install_core(
             let already_covered = target_dirs
                 .iter()
                 .any(|(_, dir)| dir.as_path() == Path::new(&target.path));
-            if !already_covered {
-                if let Some(harness) = Harness::parse(&target.harness) {
-                    target_dirs.push((harness, PathBuf::from(&target.path)));
-                }
+            if !already_covered && let Some(harness) = Harness::parse(&target.harness) {
+                target_dirs.push((harness, PathBuf::from(&target.path)));
             }
         }
     }
@@ -501,18 +499,24 @@ mod tests {
         .unwrap();
         assert_eq!(code, 0);
 
-        assert!(roots
-            .project_root
-            .join(".claude/skills/demo-skill/SKILL.md")
-            .is_file());
-        assert!(roots
-            .project_root
-            .join(".codex/skills/demo-skill/SKILL.md")
-            .is_file());
-        assert!(roots
-            .project_root
-            .join(".opencode/skill/demo-skill/SKILL.md")
-            .is_file());
+        assert!(
+            roots
+                .project_root
+                .join(".claude/skills/demo-skill/SKILL.md")
+                .is_file()
+        );
+        assert!(
+            roots
+                .project_root
+                .join(".codex/skills/demo-skill/SKILL.md")
+                .is_file()
+        );
+        assert!(
+            roots
+                .project_root
+                .join(".opencode/skill/demo-skill/SKILL.md")
+                .is_file()
+        );
         assert_eq!(
             std::fs::read_to_string(
                 roots
@@ -561,18 +565,24 @@ mod tests {
         .unwrap();
         assert_eq!(code, 0);
 
-        assert!(roots
-            .home
-            .join(".claude/skills/demo-skill/SKILL.md")
-            .is_file());
-        assert!(roots
-            .home
-            .join(".codex/skills/demo-skill/SKILL.md")
-            .is_file());
-        assert!(roots
-            .home
-            .join(".config/opencode/skill/demo-skill/SKILL.md")
-            .is_file());
+        assert!(
+            roots
+                .home
+                .join(".claude/skills/demo-skill/SKILL.md")
+                .is_file()
+        );
+        assert!(
+            roots
+                .home
+                .join(".codex/skills/demo-skill/SKILL.md")
+                .is_file()
+        );
+        assert!(
+            roots
+                .home
+                .join(".config/opencode/skill/demo-skill/SKILL.md")
+                .is_file()
+        );
 
         let lock_path = lock::lock_path(&roots, true);
         assert_eq!(lock_path, roots.home.join(".openhavn").join("skills.lock"));
@@ -793,9 +803,11 @@ mod tests {
 
         let equipment_log =
             std::fs::read_to_string(roots.home.join(".openhavn").join("equipment.jsonl")).unwrap();
-        assert!(equipment_log
-            .lines()
-            .any(|l| l.contains("\"decision\":\"update\"")));
+        assert!(
+            equipment_log
+                .lines()
+                .any(|l| l.contains("\"decision\":\"update\""))
+        );
 
         std::fs::remove_dir_all(&base).ok();
     }
@@ -889,17 +901,21 @@ mod tests {
         assert!(!codex_dir.exists());
 
         let lock_path = lock::lock_path(&roots, false);
-        assert!(Lockfile::load(&lock_path)
-            .unwrap()
-            .entries()
-            .unwrap()
-            .is_empty());
+        assert!(
+            Lockfile::load(&lock_path)
+                .unwrap()
+                .entries()
+                .unwrap()
+                .is_empty()
+        );
 
         let equipment_log =
             std::fs::read_to_string(roots.home.join(".openhavn").join("equipment.jsonl")).unwrap();
-        assert!(equipment_log
-            .lines()
-            .any(|l| l.contains("\"decision\":\"remove\"")));
+        assert!(
+            equipment_log
+                .lines()
+                .any(|l| l.contains("\"decision\":\"remove\""))
+        );
 
         std::fs::remove_dir_all(&base).ok();
     }
@@ -926,9 +942,11 @@ mod tests {
 
         let equipment_log =
             std::fs::read_to_string(roots.home.join(".openhavn").join("equipment.jsonl")).unwrap();
-        assert!(equipment_log
-            .lines()
-            .any(|l| l.contains("\"decision\":\"reject\"")));
+        assert!(
+            equipment_log
+                .lines()
+                .any(|l| l.contains("\"decision\":\"reject\""))
+        );
 
         std::fs::remove_dir_all(&base).ok();
     }
